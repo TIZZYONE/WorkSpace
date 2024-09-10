@@ -2,15 +2,16 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import index from "@/views/index/index.vue"
 import cs from "@/views/CS/CS.vue"
+import csone from "@/views/CS/CS_1725505889816.vue"
 import doc from "@/views/main/document.vue"
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // {
-    //   path: '/',
-    //   name: 'home',
-    //   component: HomeView
-    // },
+    {
+      path: '/',
+      name: 'index',
+      component: index
+    },
     // {
     //   path: '/about',
     //   name: 'about',
@@ -24,13 +25,10 @@ const router = createRouter({
       name: 'index',
       component: index,
       children: [
-        {path:'/main/document',name:'document',component:doc}
+        {path:'/main/document',name:'document',component:doc},
+        {path:'/main/cs',name:'cs',component:cs},
+        {path:'/main/csone',name:'csone',component:csone},
         ]
-    },
-    {
-      path: '/cs',
-      name: 'cs',
-      component: cs
     },
   ]
 })

@@ -26,10 +26,10 @@ const handleSelect = (key: string, keyPath: string[]) => {
               <el-menu-item-group>
                 <template #title>Group 1</template>
                 <el-menu-item index="1-1" :route="{name:'document'}">随笔</el-menu-item>
-                <el-menu-item index="1-2">Option 2</el-menu-item>
+                <el-menu-item index="1-2" :route="{name:'cs'}">Option 2</el-menu-item>
               </el-menu-item-group>
               <el-menu-item-group title="Group 2">
-                <el-menu-item index="1-3">Option 3</el-menu-item>
+                <el-menu-item index="1-3" :route="{name:'csone'}">csone</el-menu-item>
               </el-menu-item-group>
               <el-sub-menu index="1-4">
                 <template #title>Option4</template>
@@ -64,7 +64,7 @@ const handleSelect = (key: string, keyPath: string[]) => {
             <el-menu-item index="4">Orders</el-menu-item>
           </el-menu>
         </el-header>
-          <el-main class="mains">Main
+          <el-main class="mains">
             <router-view></router-view>
           </el-main>
 <!--          <el-footer>Footer</el-footer>-->
@@ -104,7 +104,8 @@ const handleSelect = (key: string, keyPath: string[]) => {
   text-decoration: none;
 }
 .mains{
-  padding: 25px;
+  padding: 18px;
+  background-color: #ebeef5;
 }
 
 .headers{
