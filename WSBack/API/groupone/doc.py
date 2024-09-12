@@ -8,7 +8,7 @@
 
 from typing import List, Dict, Any
 import json
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body,Query
 from sqlalchemy import create_engine, select, Table, Column, String, MetaData, Text, DateTime, Integer
 from sqlalchemy.orm import Session, sessionmaker
 from pydantic import BaseModel
@@ -23,44 +23,45 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 doc = APIRouter()
 
-
-@doc.post("/CreateDocs")
-def createDocs():
-    pass
-
-
-
-
-
-
 @doc.get("/GetData")
-async def getData(name: str):
-    table = 'base_docs'
-    engine, users_table = await open_db(table)
+async def getData(treeid: str =Query(...)):
+    # 打开数据库连接
+    engine, table = await open_db('base_docs_data')
+    try:
+        # 使用异步上下文管理器创建数据库连接
+        async with engine.connect() as connection:
+            # 开始一个新的数据库事务
+            async with connection.begin():
+                sel = select(table).where(table.c.tree_id == str(treeid))
+                # result = await connection.execute(sel)
+                result = await execute_query(connection, sel)
+                row = result.fetchone()
 
-    async with engine.connect() as connection:
-        # 查询操作
-        sel = select(users_table).where(users_table.c.name == name)
-        result = await connection.execute(sel)
-        row = result.fetchone()
+                if not row:
+                    raise HTTPException(status_code=404, detail="Document not found")
 
-        if not row:
-            raise HTTPException(status_code=404, detail="Document not found")
+                # 生成结果字典
+                result_dict = {f"column{i}": row[i + 1] for i in range(0, 2) if row[i + 1]}
+                print(result_dict)
 
-        # 生成结果字典
-        result_dict = {f"column{i}": row[i + 1] for i in range(1, 11) if row[i + 1]}
-        print(result_dict)
+                return result_dict
 
-        return result_dict
+    except SQLAlchemyError as e:
+        print(f"An error occurred: {e}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
+    finally:
+        # 关闭引擎
+        await engine.dispose()
 
 
 
 class docsData(BaseModel):
-    name:str
+
     cls :List[Dict[str, List[str]]]
+    datatext :str
     savepeople : str
     treeid : str
-[{'cls': ['cs1', 'cs2', 'cs3']}, {'cls2': ['css1', 'cs1s2']}]
+# [{'cls': ['cs1', 'cs2', 'cs3']}, {'cls2': ['css1', 'cs1s2']}]
 
 
 @doc.post("/SubmitData")
@@ -79,12 +80,12 @@ async def submitData(data: docsData):
                 row = result.fetchone()
                 if row:
                     upd = update(table).where(table.c.tree_id == data.treeid)
-                    if data.name is not None:
-                        upd = upd.values(name=data.name)
                     if data.cls is not None:
                         upd = upd.values(columns=str(data.cls))
                     if data.savepeople is not None:
                         upd = upd.values(savepeople=data.savepeople)
+                    if data.datatext is not None:
+                        upd = upd.values(text=data.datatext)
                     # result = await connection.execute(upd)
                     result = await execute_query(connection, upd)
                     print(f"Updated {result.rowcount} rows")
@@ -94,9 +95,10 @@ async def submitData(data: docsData):
                     # 构建插入语句
                     ins = insert(table).values(
                         # tree_node=json.dumps(treeList["tree_list"]),  # 转换为JSON字符串
-                        name = data.name,
+                        # name = data.name,
                         columns = str(data.cls),
-                        createtime = createtime,
+                        createtime = str(createtime),
+                        text =str(data.datatext),
                         savepeople = data.savepeople,
                         tree_id = data.treeid,
                     )
@@ -114,18 +116,6 @@ async def submitData(data: docsData):
     finally:
         # 关闭引擎
         await engine.dispose()
-
-
-
-
-@doc.post("/SubmitColumu")
-def submitColumu():
-    pass
-
-
-
-async def splitList(lst):
-    pass
 
 @doc.get("/GetList")
 async def getList(create_people:str):
@@ -162,12 +152,6 @@ async def getList(create_people:str):
     finally:
         # 关闭引擎
         await engine.dispose()
-
-
-
-
-
-
 
 
 class treeList(BaseModel):
