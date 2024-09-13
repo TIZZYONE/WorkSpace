@@ -66,7 +66,9 @@ class docsData(BaseModel):
 
 @doc.post("/SubmitData")
 async def submitData(data: docsData):
-    print(data)
+    print(data.cls[0])
+
+    
     # 打开数据库连接
     engine, table = await open_db('base_docs_data')
     try:
