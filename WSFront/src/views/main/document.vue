@@ -57,10 +57,14 @@
       </el-aside>
 
       <el-main >
-        <div v-if="selectedTreeId !== null">
+
         <el-button type="primary" @click="addRow">添加行</el-button>
         <el-button type="primary" @click="addColumn">添加列</el-button>
-        <el-table border stripe :data="tableData" style="width: 100%" max-height="600">
+        <el-button type="primary" @click="addColumn">tia</el-button>
+
+
+        <div v-if="selectedTreeId !== null">
+        <el-table border stripe :data="tableData"  style="width: 100%" max-height="600">
           <el-table-column
             v-for="(col, colIndex) in dynamicColumns"
             :key="colIndex"
@@ -94,10 +98,11 @@
               <el-button link type="primary" size="small" @click="deleteRow(scope.$index)">删除</el-button>
             </template>
           </el-table-column>
-        </el-table>
+        </el-table></div>
         <h3></h3>
+        <div v-if="datatext !== '' ">
         <el-input placeholder="请输入内容" type="textarea" autosize v-model="datatext"></el-input>
-      </div>
+        </div>
       </el-main>
     </el-container>
   </div>
@@ -361,7 +366,7 @@ const saveCell = (rowIndex, colIndex) => {
 }
 
 .custom-tree-container {
-  margin-top: 20px;
+  margin-top: 1px;
 }
 
 .custom-tree-node {
