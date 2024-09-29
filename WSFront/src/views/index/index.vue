@@ -26,6 +26,7 @@ const handleSelect = (key: string, keyPath: string[]) => {
               <el-menu-item-group>
                 <template #title>Group 1</template>
                 <el-menu-item index="1-1" :route="{name:'document'}">随笔</el-menu-item>
+                <el-menu-item index="1-1" :route="{name:'eat'}">今天吃啥</el-menu-item>
                 <el-menu-item index="1-2" :route="{name:'cs'}">Option 2</el-menu-item>
               </el-menu-item-group>
               <el-menu-item-group title="Group 2">

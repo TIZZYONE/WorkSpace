@@ -57,51 +57,50 @@
       </el-aside>
 
       <el-main >
+        <el-row :gutter="20" class="el-button-group">
+          <el-col :span="2"><el-button type="primary" @click="addRow">添加行</el-button></el-col>
+          <el-col :span="2"><el-button type="primary" @click="addColumn">添加列</el-button></el-col>
+          <el-col :span="2"><el-button type="primary" @click="addText">添加文本</el-button></el-col>
+        </el-row>
 
-        <el-button type="primary" @click="addRow">添加行</el-button>
-        <el-button type="primary" @click="addColumn">添加列</el-button>
-        <el-button type="primary" @click="addColumn">tia</el-button>
-
-
-        <div v-if="selectedTreeId !== null">
-        <el-table border stripe :data="tableData"  style="width: 100%" max-height="600">
-          <el-table-column
-            v-for="(col, colIndex) in dynamicColumns"
-            :key="colIndex"
-            :prop="col.prop"
-            :label="col.label"
-            width="120"
-          >
-            <template #default="scope">
-              <div v-if="isEditingCell(scope.$index, colIndex)">
-                <el-input
-                  v-model="tableData[scope.$index][col.prop]"
-                  @blur="saveCell(scope.$index, colIndex)"
-                  inline
+        <div v-if="tableData.length > 0">
+          <el-table border stripe :data="tableData"  style="width: 100%" max-height="600">
+            <el-table-column
+              v-for="(col, colIndex) in dynamicColumns"
+              :key="colIndex"
+              :prop="col.prop"
+              :label="col.label"
+              width="120"
+            >
+              <template #default="scope">
+                <div v-if="isEditingCell(scope.$index, colIndex)">
+                  <el-input
+                    v-model="tableData[scope.$index][col.prop]"
+                    @blur="saveCell(scope.$index, colIndex)"
+                    inline
+                  />
+                </div>
+                <div v-else @click="editCell(scope.$index, colIndex)">
+                  {{ scope.row[col.prop] }}
+                </div>
+              </template>
+              <template #header="scope">
+                <span>{{ scope.column.label }}</span>
+                <el-button
+                  type="danger" :icon="Delete" circle size="small"
+                  @click="deleteColumn(colIndex)"
                 />
-              </div>
-              <div v-else @click="editCell(scope.$index, colIndex)">
-                {{ scope.row[col.prop] }}
-              </div>
-            </template>
-            <template #header="scope">
-              <span>{{ scope.column.label }}</span>
-              <el-button
-                type="text"
-                icon="el-icon-delete"
-                @click="deleteColumn(colIndex)"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column fixed="right" label="操作" min-width="120">
-            <template #default="scope">
-              <el-button link type="primary" size="small" @click="deleteRow(scope.$index)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table></div>
+              </template>
+            </el-table-column>
+            <el-table-column fixed="right" label="操作" min-width="120">
+              <template #default="scope">
+                <el-button link type="primary" size="small" @click="deleteRow(scope.$index)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table></div>
         <h3></h3>
-        <div v-if="datatext !== '' ">
-        <el-input placeholder="请输入内容" type="textarea" autosize v-model="datatext"></el-input>
+        <div v-if="tableData.length > 0 && (datatext||textbuttoon)"  >
+          <el-input placeholder="请输入内容" type="textarea" autosize v-model="datatext"></el-input>
         </div>
       </el-main>
     </el-container>
@@ -112,7 +111,14 @@
 import { ref, nextTick, watch, onMounted, computed } from 'vue'
 import { ElTree, ElMessageBox, ElMessage, ElIcon } from 'element-plus'
 import axios from 'axios'
-
+import {
+  Check,
+  Delete,
+  Edit,
+  Message,
+  Search,
+  Star,
+} from '@element-plus/icons-vue'
 interface Tree {
   id: number
   label: string
@@ -129,6 +135,8 @@ const tableData = ref([])
 const dynamicColumns = ref([])
 const selectedTreeId = ref<number | null>(null)
 const editingCell = ref({ rowIndex: null, colIndex: null })
+const textbuttoon = ref(false)
+
 
 const generateId = () => 'cc' + Date.now()
 
@@ -176,6 +184,7 @@ const fetchData = async (id: number) => {
   tableData.value = []
   dynamicColumns.value = []
   datatext.value = ''
+  textbuttoon.value = false
   try {
     const response = await axios.get('http://10.2.3.117:8000/doc/GetData', {
       params: { treeid: id.toString() }
@@ -185,6 +194,7 @@ const fetchData = async (id: number) => {
     datatext.value = data.column1
     const columns = []
     const rows = []
+
 
     column0Data.forEach((col, index) => {
       const colName = Object.keys(col)[0]
@@ -198,6 +208,8 @@ const fetchData = async (id: number) => {
 
     dynamicColumns.value = columns
     tableData.value = rows
+
+    console.log(tableData)
   } catch (error) {
     console.error('获取数据时出错:', error)
   }
@@ -234,6 +246,10 @@ const addColumn = () => {
   const newColumnProp = `newColumn${dynamicColumns.value.length + 1}`
   dynamicColumns.value.push({ prop: newColumnProp, label: `新列 ${dynamicColumns.value.length + 1}` })
   tableData.value.forEach(row => row[newColumnProp] = '新值')
+}
+
+const addText = () => {
+  textbuttoon.value = !textbuttoon.value  // 更新 tablebuttoon 的值
 }
 
 const deleteColumn = (colIndex) => {
@@ -336,13 +352,17 @@ const saveCell = (rowIndex, colIndex) => {
   font-size: 18px;
   font-weight: bold;
   color: #333;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .action-button {
   color: #409eff;
   cursor: pointer;
   margin-left: 10px;
+}
+
+.el-button-group{
+  margin: 20px;
 }
 
 .action-button.add {

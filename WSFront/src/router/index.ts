@@ -4,6 +4,8 @@ import index from "@/views/index/index.vue"
 import cs from "@/views/CS/CS.vue"
 import csone from "@/views/CS/CS_1725505889816.vue"
 import doc from "@/views/main/document.vue"
+import eat from "@/views/main/selectEat.vue"
+import index2 from "@/views/index2/index2.vue"
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -11,6 +13,11 @@ const router = createRouter({
       path: '/',
       name: 'index',
       component: index
+    },
+    {
+      path: '/img',
+      name: 'img',
+      component: index2
     },
     // {
     //   path: '/about',
@@ -26,6 +33,7 @@ const router = createRouter({
       component: index,
       children: [
         {path:'/main/document',name:'document',component:doc},
+        {path:'/main/selecteat',name:'selecteat',component:eat},
         {path:'/main/cs',name:'cs',component:cs},
         {path:'/main/csone',name:'csone',component:csone},
         ]
